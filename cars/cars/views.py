@@ -8,10 +8,13 @@ def index(request):
 
 
 def update_autoru_catalog(request):
+    create_db()
     truncate()
     fill_db()
+    return render(request, 'update.html')
 
 
-def show_car(request, mark):
+def show_car(request):
+    mark = request.GET.get('mark')
     model_lst = get_list_cars(mark)
     return render(request, 'show_car.html', {'model_lst': model_lst})
