@@ -27,7 +27,7 @@ def create_db():
     cursor.execute(
         '''CREATE TABLE IF NOT EXISTS marks (
             mark_id INTEGER PRIMARY KEY,
-            mark VARCHAR(30))'''
+            mark VARCHAR(30) UNIQUE)'''
             )
     cursor.execute(
         '''CREATE TABLE IF NOT EXISTS models (
@@ -47,10 +47,10 @@ def fill_db():
     conn = sqlite3.connect('cars/cars.sqlite')
     cursor = conn.cursor()
     for i in data:
-        cursor.execute('INSERT INTO marks (mark) VALUES (?)', (i, ))
+        cursor.execute('INSERT OR IGNORE INTO marks (mark) VALUES (?)', (i, ))
         for j in data[i]:
             cursor.execute(
-                '''INSERT INTO models (model, mark_id)
+                '''INSERT OR IGNORE INTO models (model, mark_id)
                 VALUES (?, (SELECT mark_id FROM marks WHERE mark = ?))''', (j, i)
                 )
     cursor.execute('''SELECT mark FROM marks''')
@@ -66,7 +66,7 @@ def get_marks():
 
     conn = sqlite3.connect('cars/cars.sqlite')
     cursor = conn.cursor()
-    cursor.execute('''SELECT mark FROM marks''')
+    cursor.execute('''SELECT mark FROM marks ORDER BY mark''')
     result = cursor.fetchall()
     cursor.close()
     conn.close()
@@ -75,6 +75,8 @@ def get_marks():
 
 
 def get_list_cars(mark):
+    '''получаем связанные данные из моделей marks и models'''
+
     conn = sqlite3.connect('cars/cars.sqlite')
     cursor = conn.cursor()
     cursor.execute('''SELECT model
@@ -83,23 +85,19 @@ def get_list_cars(mark):
                    WHERE marks.mark = ?''', (mark, ))
     result = sorted(list(set(i[0] for i in cursor.fetchall())))
     result = {mark: result}
-    print(result)
     cursor.close()
     conn.close()
     return result
 
 
 def truncate():
-    '''удаляем все записи из таблиц'''
+    '''удаляем все записи из таблиц. Функцию назвал truncate,
+    а удаляю через delete, т.к., как оказалось, в sqlite нет truncate'''
 
     conn = sqlite3.connect('cars/cars.sqlite')
     cursor = conn.cursor()
-    cursor.execute('TRUNCATE TABLE marks')
-    cursor.execute('TRUNCATE TABLE models')
+    cursor.execute('DELETE FROM marks')
+    cursor.execute('DELETE FROM models')
     conn.commit()
     cursor.close()
     conn.close()
-
-
-create_db()
-fill_db()
