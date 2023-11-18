@@ -19,10 +19,10 @@ from django.urls import path
 from . import views
 
 urlpatterns = [
-    path('', views.index),
+    path('', views.index, name='index'),
     path('admin/', admin.site.urls),
     # я не стал создавать отдельное приложение для тестового задания
     # решил сделать все в главном url
-    path('update_autoru_catalog/', views.update_autoru_catalog),
-    path('show_car/', views.show_car)
+    path('update_autoru_catalog/', views.update_autoru_catalog, name='update'),
+    path('show_car/<mark>/', views.show_car, name='show_car')
 ]
